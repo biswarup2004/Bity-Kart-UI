@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tea Library - Premium Tea Experience</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+      <link rel="shortcut icon" href="img/icon.png" type="image/x-icon">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">𝗧𝗲𝗮 𝗟𝗶𝗯𝗿𝗮𝗿𝘆</div>
+            
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-links">
+                <li><a href="#" onclick="showPage('home')">Home</a></li>
+                <li><a href="#tea-products">Tea</a></li>
+                <li><a href="#coffee-products">Coffee</a></li>
+                <li><a href="#chips-products">Snacks</a></li>
+                <li><a href="#colddrinks-products">Beverages</a></li>
+                <li><a href="#dryfruits-products">Dry Fruits</a></li>
+            </ul>
+            
+            <div class="nav-actions">
+                <!-- Mobile Search Button -->
+                <button class="mobile-search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+                
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Search products...">
+                    <button onclick="searchProducts()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <div class="cart-icon" onclick="showPage('cart')">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-badge" id="cart-count">0</span>
+                </div>
+                
+                <div class="auth-buttons" id="auth-buttons">
+                    <button class="btn btn-outline" onclick="showModal('signin')">Sign In</button>
+                    <button class="btn btn-primary" onclick="showModal('signup')">Sign Up</button>
+                </div>
+                
+                <div class="user-menu" id="user-menu" style="display: none;">
+                    <div class="user-profile-dropdown" onclick="toggleUserDropdown()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="user-name">Welcome, User!</span>
+                        <i class="fas fa-chevron-down" id="dropdown-arrow"></i>
+                    </div>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div class="user-info">
+                            <div class="avatar-large">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-details">
+                                <h4 id="profile-name">User Name</h4>
+                                <p id="profile-email">user@email.com</p>
+                                <p class="member-since">Member since 2024</p>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <ul class="dropdown-menu">
+                            <li onclick="showPage('profile')">
+                                <i class="fas fa-user-edit"></i> View Profile
+                            </li>
+                            <li onclick="showPage('orders')">
+                                <i class="fas fa-shopping-bag"></i> My Orders
+                            </li>
+                            <li onclick="showPage('cart')">
+                                <i class="fas fa-shopping-cart"></i> My Cart
+                            </li>
+                            <li onclick="showSettings()">
+                                <i class="fas fa-cog"></i> Settings
+                            </li>
+                            <li class="logout-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Rest of your index.html content remains the same -->
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <!-- Hero Carousel -->
+        <div id="heroCarousel" class="carousel-container">
+            <div class="carousel-slides">
+                <div class="carousel-slide active">
+                    <img src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=1200&h=400&fit=crop" alt="Tea Collection">
+                    <div class="carousel-caption">
+                        <h2>Premium Tea Collection</h2>
+                        <p>Discover finest teas from across India</p>
+                        <button class="btn btn-primary" onclick="document.querySelector('#tea-products').scrollIntoView({ behavior: 'smooth' })">Shop Tea</button>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=1200&h=400&fit=crop" alt="Coffee">
+                    <div class="carousel-caption">
+                        <h2>Aromatic Coffee Selection</h2>
+                        <p>Energize your mornings with premium coffee</p>
+                        <button class="btn btn-primary" onclick="document.querySelector('#coffee-products').scrollIntoView({ behavior: 'smooth' })">Shop Coffee</button>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=1200&h=400&fit=crop" alt="Healthy Snacks">
+                    <div class="carousel-caption">
+                        <h2>Snacks & Dry Fruits</h2>
+                        <p>Healthy and delicious snacking options</p>
+                        <button class="btn btn-primary" onclick="document.querySelector('#dryfruits-products').scrollIntoView({ behavior: 'smooth' })">Shop Snacks</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carousel Navigation -->
+            <button class="carousel-nav carousel-prev" onclick="changeSlide(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="carousel-nav carousel-next" onclick="changeSlide(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <!-- Carousel Indicators -->
+            <div class="carousel-indicators">
+                <span class="indicator active" onclick="currentSlide(1)"></span>
+                <span class="indicator" onclick="currentSlide(2)"></span>
+                <span class="indicator" onclick="currentSlide(3)"></span>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Your Trusted Grocery Store</h1>
+            <p>Fresh groceries, premium quality products, and unbeatable prices delivered to your doorstep.</p>
+            <button class="btn btn-primary" onclick="document.querySelector('#tea-products').scrollIntoView({ behavior: 'smooth' })">Shop Now <i class="fas fa-arrow-right"></i></button>
+        </section>
+
+        <!-- Tea Collection -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">🍵 Tea Collection</h2>
+                <div class="products-grid" id="tea-products">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Coffee Collection -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">☕ Coffee Collection</h2>
+                <div class="products-grid" id="coffee-products">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Chips & Snacks -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">🍟 Chips & Snacks</h2>
+                <div class="products-grid" id="chips-products">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Cold Drinks -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">🥤 Cold Drinks</h2>
+                <div class="products-grid" id="colddrinks-products">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Dry Fruits -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">🌰 Dry Fruits & Nuts</h2>
+                <div class="products-grid" id="dryfruits-products">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Salt Collection -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">🧂 Salt Collection</h2>
+                <div class="products-grid" id="salt-products">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Sugar Collection -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">🍬 Sugar Collection</h2>
+                <div class="products-grid" id="sugar-products">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- User Profile Page -->
+    <div id="profile" class="page">
+        <div class="cart-container">
+            <div class="container">
+                <h2 class="section-title">My Profile</h2>
+                
+                <!-- Back Button -->
+                <button class="back-button" onclick="showPage('home')">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
+                
+                <div class="profile-container">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="profile-avatar-large">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="profile-info">
+                                <h2 id="profile-display-name">Loading...</h2>
+                                <p id="profile-display-email">Loading...</p>
+                                <span class="profile-badge">Premium Member</span>
+                            </div>
+                            <button class="btn btn-outline" onclick="editProfile()">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>
+                        </div>
+                        
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="total-orders">0</div>
+                                <div class="stat-label">Total Orders</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="total-spent">₹0</div>
+                                <div class="stat-label">Total Spent</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">0</div>
+                                <div class="stat-label">Reviews</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="cart-items-count">0</div>
+                                <div class="stat-label">Cart Items</div>
+                            </div>
+                        </div>
+
+                        <div class="profile-details">
+                            <div class="detail-section">
+                                <h3>Personal Information</h3>
+                                <div class="detail-grid">
+                                    <div class="detail-item">
+                                        <label>Full Name</label>
+                                        <span id="detail-name">Loading...</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Display Name</label>
+                                        <span id="display-name">Loading...</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Email</label>
+                                        <span id="detail-email">Loading...</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>User ID</label>
+                                        <span id="detail-id">Loading...</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Member Since</label>
+                                        <span id="detail-member-since">2024</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-section">
+                                <h3>Recent Activity</h3>
+                                <div class="activity-list">
+                                    <p style="color: white; text-align: center;" id="activity-message">Loading activity...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Page -->
+    <div id="orders" class="page">
+        <div class="cart-container">
+            <div class="container">
+                <h2 class="section-title">My Orders</h2>
+                
+                <!-- Back Button -->
+                <button class="back-button" onclick="showPage('home')">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
+                
+                <div class="orders-container" id="orders-list">
+                    <div style="text-align: center; color: white; font-size: 1.2rem;">
+                        <p>Loading your orders...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Page -->
+    <div id="cart" class="page">
+        <div class="cart-container">
+            <div class="container">
+                <h2 class="section-title">Your Shopping Cart</h2>
+                
+                <!-- Back Button -->
+                <button class="back-button" onclick="showPage('home')">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
+                
+                <div id="cart-items">
+                    <!-- Cart items will be displayed here -->
+                </div>
+                <div class="cart-total">
+                    <h3>Total Amount: ₹<span id="total-amount">0</span></h3>
+                    <button class="btn btn-primary" onclick="checkout()">
+                        <i class="fas fa-credit-card"></i> Proceed to Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign In Modal -->
+    <div id="signin-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('signin')">&times;</button>
+            <div class="modal-header">
+                <h2>Welcome Back</h2>
+                <p>Sign in to your account</p>
+            </div>
+            <form id="signin-form">
+                <div class="form-group">
+                    <label for="signin-email">Email</label>
+                    <input type="email" id="signin-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;">
+                Don't have an account? <a href="#" onclick="closeModal('signin'); showModal('signup');" style="color: var(--primary);">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div id="signup-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('signup')">&times;</button>
+            <div class="modal-header">
+                <h2>Create Account</h2>
+                <p>Join Tea Library today</p>
+            </div>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;">
+                Already have an account? <a href="#" onclick="closeModal('signup'); showModal('signin');" style="color: var(--primary);">Sign in</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Our Categories</h3>
+                <ul>
+                    <li><a href="#">Tea</a></li>
+                    <li><a href="#">Coffee</a></li>
+                    <li><a href="#">Snacks & Chips</a></li>
+                    <li><a href="#">Cold Drinks</a></li>
+                    <li><a href="#">Dry Fruits</a></li>
+                    <li><a href="#">Salt & Sugar</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Helpful Links</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Refund Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Popular Brands</h3>
+                <ul>
+                    <li>Tata Tea</li>
+                    <li>Nescafe</li>
+                    <li>Lay's</li>
+                    <li>Coca-Cola</li>
+                    <li>Nutraj</li>
+                    <li>+ Many More</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Info</h3>
+                <ul>
+                    <li>Building 101</li>
+                    <li>Central Avenue</li>
+                    <li>Bhubaneswar, Odisha</li>
+                    <li>India - 751024</li>
+                    <li>Email: support@tea_library.com</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025  Tea Library| Your Trusted Online Grocery Store</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+            updateCartCount();
+            updateAuthUI();
+            loadCart();
+        });
+    </script>
+</body>
+</html>

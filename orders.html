@@ -1,0 +1,280 @@
+// [file name]: orders.html
+// [file content begin]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tea Library | My Orders</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="shortcut icon" href="img/icon.png" type="image/x-icon">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">𝗧𝗲𝗮 𝗟𝗶𝗯𝗿𝗮𝗿𝘆</div>
+            
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#">Clothing</a></li>
+                <li><a href="#">Electronics</a></li>
+                <li><a href="#">Accessories</a></li>
+            </ul>
+            
+            <div class="nav-actions">
+                <div class="cart-icon" onclick="window.location.href='cart.html'">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-badge" id="cart-count">0</span>
+                </div>
+                
+                <div class="auth-buttons" id="auth-buttons">
+                    <button class="btn btn-outline" onclick="showModal('signin')">Sign In</button>
+                    <button class="btn btn-primary" onclick="showModal('signup')">Sign Up</button>
+                </div>
+                
+                <div class="user-menu" id="user-menu" style="display: none;">
+                    <div class="user-profile-dropdown" onclick="toggleUserDropdown()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="user-name">Welcome, User!</span>
+                        <i class="fas fa-chevron-down" id="dropdown-arrow"></i>
+                    </div>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div class="user-info">
+                            <div class="avatar-large">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-details">
+                                <h4 id="profile-name">User Name</h4>
+                                <p id="profile-email">user@email.com</p>
+                                <p class="member-since">Member since 2025</p>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <ul class="dropdown-menu">
+                            <li onclick="window.location.href='profile.html'">
+                                <i class="fas fa-user-edit"></i> View Profile
+                            </li>
+                            <li onclick="window.location.href='orders.html'">
+                                <i class="fas fa-shopping-bag"></i> My Orders
+                            </li>
+                            <li onclick="window.location.href='cart.html'">
+                                <i class="fas fa-shopping-cart"></i> My Cart
+                            </li>
+                            <li onclick="showSettings()">
+                                <i class="fas fa-cog"></i> Settings
+                            </li>
+                            <li class="logout-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Orders Page -->
+    <div class="cart-container">
+        <div class="container">
+            <h2 class="section-title">My Orders</h2>
+             <button class="back-button" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </button>
+            <div class="orders-container" id="orders-container">
+                <div style="text-align: center; color: white; font-size: 1.2rem;">
+                    <p>Loading your orders...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign In Modal -->
+    <div id="signin-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('signin')">&times;</button>
+            <div class="modal-header">
+                <h2>Welcome Back</h2>
+                <p>Sign in to your account</p>
+            </div>
+            <form id="signin-form">
+                <div class="form-group">
+                    <label for="signin-email">Email</label>
+                    <input type="email" id="signin-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;">
+                Don't have an account? <a href="#" onclick="closeModal('signin'); showModal('signup');" style="color: var(--primary);">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div id="signup-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('signup')">&times;</button>
+            <div class="modal-header">
+                <h2>Create Account</h2>
+                <p>Join Tea Library today</p>
+            </div>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;">
+                Already have an account? <a href="#" onclick="closeModal('signup'); showModal('signin');" style="color: var(--primary);">Sign in</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            updateCartCount();
+            updateAuthUI();
+            checkUserAccess();
+            loadUserOrdersPage();
+        });
+
+        function checkUserAccess() {
+            const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+            if (!currentUser) {
+                window.location.href = "index.html";
+                return;
+            }
+        }
+
+        async function loadUserOrdersPage() {
+            try {
+                const orders = await getUserOrders();
+                displayOrdersPage(orders);
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                const ordersContainer = document.getElementById('orders-container');
+                if (ordersContainer) {
+                    ordersContainer.innerHTML = `
+                        <div style="text-align: center; color: white; font-size: 1.2rem;">
+                            <p>Failed to load orders. Please try again.</p>
+                            <button class="btn btn-primary" onclick="loadUserOrdersPage()">Retry</button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function displayOrdersPage(orders) {
+            const ordersContainer = document.getElementById('orders-container');
+            if (!ordersContainer) return;
+
+            if (orders.length === 0) {
+                ordersContainer.innerHTML = `
+                    <div style="text-align: center; color: white; font-size: 1.2rem;">
+                        <p>No orders found.</p>
+                        <p>Start shopping to see your orders here!</p>
+                        <button class="btn btn-primary" onclick="window.location.href='index.html'">Start Shopping</button>
+                    </div>
+                `;
+                return;
+            }
+
+            ordersContainer.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-id">Order #BK${order.id}</div>
+                        <div class="order-status status-${order.status ? order.status.toLowerCase() : 'pending'}">
+                            ${order.status || 'Processing'}
+                        </div>
+                    </div>
+                    <div class="order-items">
+                        ${order.orderItems && order.orderItems.length > 0 ? `
+                            <img src="${order.orderItems[0].imageUrl || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=60&h=60&fit=crop'}" alt="Product">
+                            <div class="order-details">
+                                <h4>${order.orderItems[0].productName || 'Product'}</h4>
+                                <p>${order.orderItems.length} item(s)</p>
+                                <p class="order-date">Ordered on ${new Date(order.orderDate).toLocaleDateString()}</p>
+                            </div>
+                        ` : `
+                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=60&h=60&fit=crop" alt="Product">
+                            <div class="order-details">
+                                <h4>Order Items</h4>
+                                <p>Multiple items</p>
+                                <p class="order-date">Ordered on ${new Date(order.orderDate).toLocaleDateString()}</p>
+                            </div>
+                        `}
+                        <div class="order-amount">₹${order.totalAmount}</div>
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn btn-outline btn-small" onclick="viewOrderDetails(${order.id})">View Details</button>
+                        <button class="btn btn-primary btn-small" onclick="reorder(${order.id})">Reorder</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewOrderDetails(orderId) {
+            showNotification('Order details functionality coming soon!');
+        }
+
+        function reorder(orderId) {
+            showNotification('Reorder functionality coming soon!');
+        }
+    </script>
+    <script>
+function goBack() {
+    // Use history back or navigate to home
+    if (history.length > 1) {
+        history.back();
+    } else {
+        window.location.href = 'index.html';
+    }
+}
+
+// Handle escape key for back navigation
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        goBack();
+    }
+});
+
+// Also update the existing DOMContentLoaded function in each file:
+document.addEventListener("DOMContentLoaded", function() {
+    updateCartCount();
+    updateAuthUI();
+    // ... other existing code ...
+    
+    // Add this to ensure back button works
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!currentUser && (window.location.pathname.includes('profile.html') || 
+                         window.location.pathname.includes('orders.html'))) {
+        window.location.href = 'index.html';
+    }
+});
+</script>
+</body>
+</html>
+// [file content end]
