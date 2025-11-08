@@ -47,7 +47,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    max-width: 1400px;
+    max-width: 1450px;
     margin: 0 auto;
 }
 
@@ -58,6 +58,8 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-bottom: 15px;
+    
 }
 
 .nav-links {
