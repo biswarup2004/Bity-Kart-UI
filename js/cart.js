@@ -1,6 +1,4 @@
-// [file name]: cart.js
-// [file content begin]
-// Add to cart function with authentication check
+
 function addToCart(id, name, price, imageUrl) {
     // Check if user is logged in
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
@@ -194,7 +192,7 @@ function updateAllProductButtons() {
     });
 }
 
-// Enhanced Checkout function with backend integration
+// Enhanced Checkout function - Redirects to payment page
 async function checkout() {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     if (!currentUser) {
@@ -209,42 +207,22 @@ async function checkout() {
         return;
     }
     
-    try {
-        // Prepare order data
-        const productQuantities = {};
-        let totalAmount = 0;
-        
-        cart.forEach(item => {
-            productQuantities[item.id] = item.quantity;
-            totalAmount += item.price * item.quantity;
-        });
-        
-        const orderData = {
-            productQuantities: productQuantities,
-            totalAmount: totalAmount
-        };
-        
-        showNotification('Placing your order...');
-        
-        // Place order via API
-        const order = await placeOrder(orderData);
-        
-        // Clear cart after successful order
-        localStorage.removeItem('cart');
-        updateCartCount();
-        loadCart();
-        updateAllProductButtons();
-        
-        showNotification('Order placed successfully! Thank you for your purchase.');
-        
-        // Redirect to orders page
-        if (typeof showPage === 'function') {
-            showPage('orders');
+    // Check if we're on a separate cart.html page or SPA
+    if (window.location.pathname.includes('cart.html') || 
+        window.location.pathname.endsWith('cart.html')) {
+        // Redirect to payment page for separate HTML files
+        window.location.href = 'payment.html';
+    } else {
+        // For SPA, check if payment.html exists or use SPA navigation
+        try {
+            // Try to redirect to payment.html
+            window.location.href = 'payment.html';
+        } catch (error) {
+            // Fallback: show payment modal or use SPA approach
+            showNotification('Proceeding to payment...');
+            // You can implement a payment modal here as fallback
+            console.log('Payment page not found, implement fallback payment modal');
         }
-        
-    } catch (error) {
-        showNotification('Failed to place order. Please try again.');
-        console.error('Checkout error:', error);
     }
 }
 

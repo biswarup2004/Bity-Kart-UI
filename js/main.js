@@ -1,6 +1,4 @@
-// [file name]: main.js
-// [file content begin]
-// Global variables
+
 let currentUser = JSON.parse(localStorage.getItem("currentUser")) || null;
 let currentSlideIndex = 0;
 const totalSlides = 3;

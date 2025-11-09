@@ -1,10 +1,24 @@
-// [file name]: api.js
-// [file content begin]
-const BASE_URL = "https://bitykart-backend-production.up.railway.app";
+// Fixed API.js - No body stream errors
+const BASE_URL = "http://localhost:8080";
+
+// Helper function to get auth headers
+function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return headers;
+}
 
 // Authentication API calls
 async function registerUser(userData) {
     try {
+        console.log('Registering user:', userData.email);
         const response = await fetch(`${BASE_URL}/users/register`, {
             method: 'POST',
             headers: {
@@ -18,15 +32,16 @@ async function registerUser(userData) {
             throw new Error(errorData.error || 'Registration failed');
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
+        console.error('Registration error:', error);
         throw error;
     }
 }
 
 async function loginUser(credentials) {
     try {
+        console.log('Logging in user:', credentials.email);
         const response = await fetch(`${BASE_URL}/users/login`, {
             method: 'POST',
             headers: {
@@ -40,9 +55,9 @@ async function loginUser(credentials) {
             throw new Error(errorData.error || 'Login failed');
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
+        console.error('Login error:', error);
         throw error;
     }
 }
@@ -54,21 +69,20 @@ async function getUserProfile() {
             throw new Error('No authentication token found');
         }
 
+        console.log('Fetching user profile...');
+        
         const response = await fetch(`${BASE_URL}/users/validate`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: getAuthHeaders()
         });
 
         if (!response.ok) {
             throw new Error('Failed to fetch user profile');
         }
 
-        const user = await response.json();
-        return user;
+        return await response.json();
     } catch (error) {
+        console.error('Get user profile error:', error);
         throw error;
     }
 }
@@ -80,25 +94,30 @@ async function placeOrder(orderData) {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         
         if (!token || !currentUser) {
-            throw new Error('User not authenticated');
+            throw new Error('User not authenticated. Please sign in again.');
         }
+
+        console.log('=== PLACE ORDER REQUEST ===');
+        console.log('User ID:', currentUser.id);
+        console.log('Order Data:', orderData);
 
         const response = await fetch(`${BASE_URL}/orders/place/${currentUser.id}`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(orderData)
         });
 
         if (!response.ok) {
-            throw new Error('Failed to place order');
+            const errorText = await response.text();
+            console.error('Order placement failed:', errorText);
+            throw new Error('Failed to place order: ' + response.status);
         }
 
         const order = await response.json();
+        console.log('Order placed successfully:', order);
         return order;
     } catch (error) {
+        console.error('Place order error:', error);
         throw error;
     }
 }
@@ -109,36 +128,92 @@ async function getUserOrders() {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         
         if (!token || !currentUser) {
-            throw new Error('User not authenticated');
+            throw new Error('User not authenticated. Please sign in again.');
         }
+
+        console.log('=== GET USER ORDERS REQUEST ===');
+        console.log('User ID:', currentUser.id);
+        console.log('Token exists:', !!token);
+        console.log('API URL:', `${BASE_URL}/orders/user/${currentUser.id}`);
 
         const response = await fetch(`${BASE_URL}/orders/user/${currentUser.id}`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: getAuthHeaders()
         });
 
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+
         if (!response.ok) {
-            throw new Error('Failed to fetch orders');
+            if (response.status === 401 || response.status === 403) {
+                console.log('Authentication failed - clearing user data');
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('token');
+                throw new Error('Session expired. Please sign in again.');
+            }
+            throw new Error(`Failed to fetch orders: ${response.status}`);
         }
 
         const orders = await response.json();
+        console.log('Orders fetched successfully:', orders.length, 'orders');
         return orders;
     } catch (error) {
+        console.error('Get user orders error:', error);
+        
+        // If authentication fails, clear storage and notify
+        if (error.message.includes('Session expired') || 
+            error.message.includes('401') || 
+            error.message.includes('403')) {
+            showNotification('Session expired. Please sign in again.');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+        
         throw error;
     }
 }
 
-// Product API call (existing but enhanced)
+// Payment API calls
+async function processPaymentAPI(paymentData) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('User not authenticated');
+        }
+
+        console.log('Processing payment:', paymentData);
+
+        const response = await fetch(`${BASE_URL}/payments/process`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(paymentData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Payment failed');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Payment processing error:', error);
+        throw error;
+    }
+}
+
+// Product API call
 async function loadProducts() {
     try {
+        console.log('Fetching products from:', `${BASE_URL}/products`);
         const response = await fetch(`${BASE_URL}/products`);
+        
         if (!response.ok) {
             throw new Error('Failed to load products');
         }
+        
         const products = await response.json();
+        console.log('Products loaded:', products.length);
 
         let trendingList = document.getElementById("trending-products");
         let teaList = document.getElementById("tea-products");
@@ -158,15 +233,11 @@ async function loadProducts() {
         if (saltList) saltList.innerHTML = "";
         if (sugarList) sugarList.innerHTML = "";
 
-        console.log("Products data:", products);
-
         // Get first 6 products for trending
         const trendingProducts = products.slice(0, 6);
 
         // Create product card with dynamic button
         function createProductCard(product) {
-            console.log(`Creating card for: ${product.name}, Price: ${product.price}, Type: ${typeof product.price}`);
-            
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
             let cartItem = cart.find(item => item.id === product.id);
             
@@ -236,8 +307,21 @@ async function loadProducts() {
         updateAllProductButtons();
 
     } catch (error) {
-        console.log("Error fetching products:", error);
+        console.error("Error fetching products:", error);
         showNotification('Error loading products. Please try again.');
     }
 }
-// [file content end]
+
+// Debug function
+function debugAuth() {
+    console.log('=== AUTHENTICATION DEBUG ===');
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('currentUser');
+    console.log('Token exists:', !!token);
+    console.log('Token preview:', token ? token.substring(0, 30) + '...' : 'none');
+    console.log('Current User:', user ? JSON.parse(user) : 'none');
+    console.log('Base URL:', BASE_URL);
+}
+
+// Make debugAuth available globally
+window.debugAuth = debugAuth;
