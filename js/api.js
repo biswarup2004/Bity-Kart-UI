@@ -1,7 +1,5 @@
-// Fixed API.js - No body stream errors
-const BASE_URL = "http://localhost:8080";
 
-// Helper function to get auth headers
+const BASE_URL = "https://tea-library.onrender.com";
 function getAuthHeaders() {
     const token = localStorage.getItem('token');
     const headers = {
