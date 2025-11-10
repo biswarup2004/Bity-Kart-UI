@@ -76,7 +76,7 @@ function showPage(pageId) {
         if (pageId === 'cart') {
             loadCart();
         } else if (pageId === 'profile') {
-            loadUserProfile(); // This will now load stats too
+            loadUserProfile();
         } else if (pageId === 'orders') {
             loadUserOrders();
         } else if (pageId === 'home') {
@@ -268,100 +268,22 @@ function updateProfileInfo(user) {
     if (profileEmail) profileEmail.textContent = user.email;
 }
 
-// Enhanced Load user profile from backend
+// Load user profile from backend
 async function loadUserProfile() {
     try {
         const user = await getUserProfile();
         updateProfileInfo(user);
         
-        // Update profile stats with real data
-        await updateProfileStats();
+        // Update profile stats if needed
+        const statNumber = document.querySelector('.stat-number');
+        if (statNumber) {
+            // You can fetch actual order count from backend here
+            statNumber.textContent = '0'; // Placeholder
+        }
     } catch (error) {
         showNotification('Failed to load profile data');
         console.error('Profile load error:', error);
     }
-}
-
-// Enhanced profile stats function for SPA
-async function updateProfileStats() {
-    try {
-        // Update cart items count
-        const cart = JSON.parse(localStorage.getItem("cart")) || [];
-        const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-        
-        const cartItemsCount = document.getElementById('cart-items-count');
-        if (cartItemsCount) {
-            cartItemsCount.textContent = totalItems;
-        }
-
-        // Fetch orders to calculate total orders and spending
-        const orders = await getUserOrders();
-        updateOrderStats(orders);
-        
-    } catch (error) {
-        console.error('Error updating profile stats:', error);
-        // Set default values if there's an error
-        const totalOrders = document.getElementById('total-orders');
-        const totalSpent = document.getElementById('total-spent');
-        const cartItemsCount = document.getElementById('cart-items-count');
-        
-        if (totalOrders) totalOrders.textContent = '0';
-        if (totalSpent) totalSpent.textContent = '₹0';
-        if (cartItemsCount) cartItemsCount.textContent = '0';
-    }
-}
-
-function updateOrderStats(orders) {
-    const totalOrders = document.getElementById('total-orders');
-    const totalSpent = document.getElementById('total-spent');
-
-    if (!totalOrders || !totalSpent) return;
-
-    if (!orders || orders.length === 0) {
-        totalOrders.textContent = '0';
-        totalSpent.textContent = '₹0';
-        return;
-    }
-
-    // Calculate total orders
-    const ordersCount = orders.length;
-    totalOrders.textContent = ordersCount;
-
-    // Calculate total spent
-    const totalAmount = orders.reduce((total, order) => {
-        return total + (parseFloat(order.totalAmount) || 0);
-    }, 0);
-    
-    totalSpent.textContent = `₹${totalAmount.toFixed(2)}`;
-
-    // Update activity message for SPA
-    updateActivityMessage(orders);
-}
-
-function updateActivityMessage(orders) {
-    const activityMessage = document.getElementById('activity-message');
-    if (!activityMessage) return;
-
-    if (!orders || orders.length === 0) {
-        activityMessage.textContent = 'No orders yet. Start shopping!';
-        return;
-    }
-
-    // Get the latest order
-    const latestOrder = orders[0];
-    const orderDate = new Date(latestOrder.orderDate).toLocaleDateString();
-    
-    activityMessage.innerHTML = `
-        <div style="color: var(--success); font-weight: 600; margin-bottom: 0.5rem;">
-            Latest Order: #BK${latestOrder.id}
-        </div>
-        <div style="color: var(--dark); margin-bottom: 0.25rem;">
-            Placed on ${orderDate} • ₹${latestOrder.totalAmount}
-        </div>
-        <div style="color: var(--primary); font-weight: 500;">
-            Status: ${latestOrder.status || 'Processing'}
-        </div>
-    `;
 }
 
 // Load user orders from backend
@@ -443,65 +365,78 @@ function editProfile() {
 
 // Enhanced mobile menu functionality
 function setupMobileMenu() {
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const navLinks = document.querySelector('.nav-links');
-    
-    if (mobileMenuBtn && navLinks) {
-        // Toggle mobile menu
-        mobileMenuBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            navLinks.classList.toggle('mobile-active');
-            
-            // Change icon
-            const icon = this.querySelector('i');
-            if (navLinks.classList.contains('mobile-active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-        
-        // Close menu when clicking on a link
-        const navLinksItems = navLinks.querySelectorAll('a');
-        navLinksItems.forEach(link => {
-            link.addEventListener('click', function() {
-                navLinks.classList.remove('mobile-active');
-                const icon = mobileMenuBtn.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            });
-        });
-        
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!navLinks.contains(e.target) && 
-                !mobileMenuBtn.contains(e.target) &&
-                navLinks.classList.contains('mobile-active')) {
-                navLinks.classList.remove('mobile-active');
-                const icon = mobileMenuBtn.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-        
-        // Prevent clicks inside nav from closing menu
-        navLinks.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
+    // Create mobile menu button
+    const mobileMenuBtn = document.createElement('button');
+    mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    mobileMenuBtn.className = 'mobile-menu-btn';
+    mobileMenuBtn.style.cssText = `
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--dark);
+        cursor: pointer;
+        padding: 0.5rem;
+    `;
+
+    // Insert mobile menu button
+    const nav = document.querySelector('.nav');
+    if (nav) {
+        nav.insertBefore(mobileMenuBtn, nav.querySelector('.nav-links'));
     }
+
+    // Mobile menu functionality
+    mobileMenuBtn.addEventListener('click', function() {
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks) {
+            navLinks.classList.toggle('mobile-active');
+        }
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+        const navLinks = document.querySelector('.nav-links');
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        
+        if (navLinks && mobileMenuBtn && 
+            !navLinks.contains(e.target) && 
+            !mobileMenuBtn.contains(e.target) &&
+            navLinks.classList.contains('mobile-active')) {
+            navLinks.classList.remove('mobile-active');
+        }
+    });
 }
 
-// Enhanced mobile search functionality
+// Enhanced search functionality for mobile
 function setupMobileSearch() {
-    const mobileSearchBtn = document.querySelector('.mobile-search-btn');
-    
-    if (mobileSearchBtn) {
-        mobileSearchBtn.addEventListener('click', function() {
-            showMobileSearch();
-        });
+    // Create mobile search button
+    const mobileSearchBtn = document.createElement('button');
+    mobileSearchBtn.innerHTML = '<i class="fas fa-search"></i>';
+    mobileSearchBtn.className = 'mobile-search-btn';
+    mobileSearchBtn.style.cssText = `
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: var(--dark);
+        cursor: pointer;
+        padding: 0.5rem;
+    `;
+
+    // Insert mobile search button
+    const navActions = document.querySelector('.nav-actions');
+    if (navActions) {
+        // Insert before cart icon
+        const cartIcon = navActions.querySelector('.cart-icon');
+        if (cartIcon) {
+            navActions.insertBefore(mobileSearchBtn, cartIcon);
+        }
     }
+
+    // Mobile search functionality
+    mobileSearchBtn.addEventListener('click', function() {
+        showMobileSearch();
+    });
 }
 
 function showMobileSearch() {
@@ -514,12 +449,11 @@ function showMobileSearch() {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.95);
+        background: rgba(0,0,0,0.9);
         z-index: 3000;
         display: flex;
         flex-direction: column;
         padding: 2rem;
-        animation: fadeIn 0.3s ease;
     `;
 
     // Search header
@@ -536,7 +470,6 @@ function showMobileSearch() {
     searchTitle.style.cssText = `
         color: white;
         margin: 0;
-        font-size: 1.5rem;
     `;
 
     const closeBtn = document.createElement('button');
@@ -545,9 +478,8 @@ function showMobileSearch() {
         background: none;
         border: none;
         color: white;
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         cursor: pointer;
-        padding: 0.5rem;
     `;
 
     // Search input container
@@ -573,13 +505,12 @@ function showMobileSearch() {
     const searchBtn = document.createElement('button');
     searchBtn.innerHTML = '<i class="fas fa-search"></i>';
     searchBtn.style.cssText = `
-        padding: 1rem 1.5rem;
+        padding: 1rem;
         background: var(--primary);
         color: white;
         border: none;
-        border-radius: 25px;
+        border-radius: 50%;
         cursor: pointer;
-        font-size: 1.2rem;
     `;
 
     // Results container
@@ -607,16 +538,11 @@ function showMobileSearch() {
     document.body.appendChild(searchOverlay);
 
     // Focus on input
-    setTimeout(() => searchInput.focus(), 100);
+    searchInput.focus();
 
     // Event handlers
     closeBtn.addEventListener('click', function() {
-        searchOverlay.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => {
-            if (document.body.contains(searchOverlay)) {
-                document.body.removeChild(searchOverlay);
-            }
-        }, 300);
+        document.body.removeChild(searchOverlay);
     });
 
     searchBtn.addEventListener('click', function() {
@@ -629,22 +555,17 @@ function showMobileSearch() {
         }
     });
 
-    // Close on overlay background click
+    // Close on overlay click
     searchOverlay.addEventListener('click', function(e) {
         if (e.target === searchOverlay) {
-            searchOverlay.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => {
-                if (document.body.contains(searchOverlay)) {
-                    document.body.removeChild(searchOverlay);
-                }
-            }, 300);
+            document.body.removeChild(searchOverlay);
         }
     });
 }
 
 function performMobileSearch(searchTerm, resultsContainer) {
     if (!searchTerm.trim()) {
-        resultsContainer.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">Please enter a search term</p>';
+        resultsContainer.innerHTML = '<p style="text-align: center; color: #6b7280;">Please enter a search term</p>';
         return;
     }
 
@@ -666,10 +587,10 @@ function performMobileSearch(searchTerm, resultsContainer) {
     });
 
     if (matchedProducts.length === 0) {
-        resultsContainer.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No products found matching your search.</p>';
+        resultsContainer.innerHTML = '<p style="text-align: center; color: #6b7280;">No products found matching your search.</p>';
     } else {
         resultsContainer.innerHTML = `
-            <h4 style="margin-bottom: 1rem; color: var(--dark); font-size: 1.2rem;">Found ${matchedProducts.length} product(s)</h4>
+            <h4 style="margin-bottom: 1rem; color: var(--dark);">Search Results (${matchedProducts.length})</h4>
             <div style="display: grid; gap: 1rem;">
                 ${matchedProducts.map(product => product.outerHTML).join('')}
             </div>
@@ -677,9 +598,7 @@ function performMobileSearch(searchTerm, resultsContainer) {
         
         // Reattach event listeners to the cloned product cards
         setTimeout(() => {
-            if (typeof updateAllProductButtons === 'function') {
-                updateAllProductButtons();
-            }
+            updateAllProductButtons();
         }, 100);
     }
 }
@@ -919,14 +838,6 @@ style.textContent = `
         from { transform: translateX(0); opacity: 1; }
         to { transform: translateX(100%); opacity: 0; }
     }
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
 `;
 document.head.appendChild(style);
 
@@ -963,6 +874,5 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof loadCart === 'function') {
         loadCart();
     }
-    
-    console.log('Mobile navigation initialized');
 });
+// [file content end]

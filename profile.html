@@ -1,5 +1,5 @@
-[file name]: profile.html
-[file content begin]
+// [file name]: profile.html
+// [file content begin]
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -217,7 +217,6 @@
     <script src="js/cart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            console.log('Profile page loaded');
             updateCartCount();
             updateAuthUI();
             loadProfileData();
@@ -226,131 +225,30 @@
         async function loadProfileData() {
             const currentUser = JSON.parse(localStorage.getItem("currentUser"));
             if (!currentUser) {
-                console.log('No user found, redirecting to home');
                 window.location.href = "index.html";
                 return;
             }
 
-            console.log('Loading profile data for user:', currentUser.id);
-            
             try {
-                // First update with stored user data immediately
-                updateProfileInfo(currentUser);
-                
-                // Then try to fetch fresh data from API
                 const user = await getUserProfile();
-                console.log('User profile fetched:', user);
                 updateProfileInfo(user);
-                
-                // Load stats
-                await updateProfileStats();
-                
+                updateProfileStats();
             } catch (error) {
                 console.error('Error loading profile:', error);
-                // Even if API fails, show the stored user data
-                updateProfileInfo(currentUser);
-                await updateProfileStats(); // Still try to load stats
-                
-                // Show gentle warning instead of error
-                showNotification('Using cached profile data');
+                showNotification('Failed to load profile data');
             }
         }
 
-        function updateProfileInfo(user) {
-            if (!user) return;
-            
-            console.log('Updating profile info with:', user);
-            
-            // Show only first name in profile display
-            const firstName = user.name ? user.name.split(' ')[0] : 'User';
-            
-            // Update profile display
-            const profileDisplayName = document.getElementById('profile-display-name');
-            const profileDisplayEmail = document.getElementById('profile-display-email');
-            const detailName = document.getElementById('detail-name');
-            const detailEmail = document.getElementById('detail-email');
-            const detailId = document.getElementById('detail-id');
-            
-            if (profileDisplayName) profileDisplayName.textContent = firstName;
-            if (profileDisplayEmail) profileDisplayEmail.textContent = user.email || 'No email';
-            if (detailName) detailName.textContent = user.name || 'No name';
-            if (detailEmail) detailEmail.textContent = user.email || 'No email';
-            if (detailId) detailId.textContent = user.id || 'N/A';
-        }
+        function updateProfileStats() {
+            // Update cart items count
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+            document.getElementById('cart-items-count').textContent = totalItems;
 
-        async function updateProfileStats() {
-            try {
-                console.log('Updating profile stats...');
-                
-                // Update cart items count from localStorage
-                const cart = JSON.parse(localStorage.getItem("cart")) || [];
-                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-                document.getElementById('cart-items-count').textContent = totalItems;
-
-                // Fetch orders to calculate total orders and spending
-                const orders = await getUserOrders();
-                console.log('Orders for stats:', orders);
-                updateOrderStats(orders);
-                
-            } catch (error) {
-                console.error('Error updating profile stats:', error);
-                // Set default values if there's an error
-                document.getElementById('total-orders').textContent = '0';
-                document.getElementById('total-spent').textContent = '₹0';
-                document.getElementById('cart-items-count').textContent = '0';
-                document.getElementById('activity-message').textContent = 'Unable to load activity data';
-            }
-        }
-
-        function updateOrderStats(orders) {
-            console.log('Updating order stats with:', orders);
-            
-            if (!orders || orders.length === 0) {
-                document.getElementById('total-orders').textContent = '0';
-                document.getElementById('total-spent').textContent = '₹0';
-                document.getElementById('activity-message').textContent = 'No orders yet. Start shopping!';
-                return;
-            }
-
-            // Calculate total orders
-            const totalOrders = orders.length;
-            document.getElementById('total-orders').textContent = totalOrders;
-
-            // Calculate total spent
-            const totalSpent = orders.reduce((total, order) => {
-                return total + (parseFloat(order.totalAmount) || 0);
-            }, 0);
-            
-            document.getElementById('total-spent').textContent = `₹${totalSpent.toFixed(2)}`;
-
-            // Update activity message
-            updateActivityMessage(orders);
-        }
-
-        function updateActivityMessage(orders) {
-            const activityMessage = document.getElementById('activity-message');
-            if (!activityMessage) return;
-
-            if (orders.length === 0) {
-                activityMessage.textContent = 'No orders yet. Start shopping!';
-                return;
-            }
-
-            // Get the latest order
-            const latestOrder = orders[0];
-            const orderDate = new Date(latestOrder.orderDate).toLocaleDateString();
-            
-            activityMessage.innerHTML = `
-                <div style="color: var(--success); font-weight: 600;">
-                    Latest Order: #BK${latestOrder.id}
-                </div>
-                <div style="color: white; margin-top: 0.5rem;">
-                    Placed on ${orderDate} • ₹${latestOrder.totalAmount}
-                </div>
-                <div style="color: var(--primary); margin-top: 0.5rem;">
-                    Status: ${latestOrder.status || 'Processing'}
-                </div>
-            `;
+            // You can fetch actual order stats from backend here
+            // For now, using placeholders
+            document.getElementById('total-orders').textContent = '0';
+            document.getElementById('total-spent').textContent = '₹0';
         }
 
         function editProfile() {
