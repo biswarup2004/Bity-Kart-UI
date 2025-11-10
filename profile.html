@@ -1,5 +1,4 @@
-// [file name]: profile.html
-// [file content begin]
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -232,23 +231,79 @@
             try {
                 const user = await getUserProfile();
                 updateProfileInfo(user);
-                updateProfileStats();
+                await updateProfileStats(); // Make this async
             } catch (error) {
                 console.error('Error loading profile:', error);
                 showNotification('Failed to load profile data');
             }
         }
 
-        function updateProfileStats() {
-            // Update cart items count
-            const cart = JSON.parse(localStorage.getItem("cart")) || [];
-            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-            document.getElementById('cart-items-count').textContent = totalItems;
+        async function updateProfileStats() {
+            try {
+                // Update cart items count
+                const cart = JSON.parse(localStorage.getItem("cart")) || [];
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                document.getElementById('cart-items-count').textContent = totalItems;
 
-            // You can fetch actual order stats from backend here
-            // For now, using placeholders
-            document.getElementById('total-orders').textContent = '0';
-            document.getElementById('total-spent').textContent = '₹0';
+                // Fetch orders to calculate total orders and spending
+                const orders = await getUserOrders();
+                updateOrderStats(orders);
+                
+            } catch (error) {
+                console.error('Error updating profile stats:', error);
+                // Set default values if there's an error
+                document.getElementById('total-orders').textContent = '0';
+                document.getElementById('total-spent').textContent = '₹0';
+                document.getElementById('cart-items-count').textContent = '0';
+            }
+        }
+
+        function updateOrderStats(orders) {
+            if (!orders || orders.length === 0) {
+                document.getElementById('total-orders').textContent = '0';
+                document.getElementById('total-spent').textContent = '₹0';
+                return;
+            }
+
+            // Calculate total orders
+            const totalOrders = orders.length;
+            document.getElementById('total-orders').textContent = totalOrders;
+
+            // Calculate total spent
+            const totalSpent = orders.reduce((total, order) => {
+                return total + (parseFloat(order.totalAmount) || 0);
+            }, 0);
+            
+            document.getElementById('total-spent').textContent = `₹${totalSpent.toFixed(2)}`;
+
+            // Update activity message
+            updateActivityMessage(orders);
+        }
+
+        function updateActivityMessage(orders) {
+            const activityMessage = document.getElementById('activity-message');
+            if (!activityMessage) return;
+
+            if (orders.length === 0) {
+                activityMessage.textContent = 'No orders yet. Start shopping!';
+                return;
+            }
+
+            // Get the latest order
+            const latestOrder = orders[0]; // Assuming orders are sorted by date
+            const orderDate = new Date(latestOrder.orderDate).toLocaleDateString();
+            
+            activityMessage.innerHTML = `
+                <div style="color: var(--success); font-weight: 600;">
+                    Latest Order: #BK${latestOrder.id}
+                </div>
+                <div style="color: white; margin-top: 0.5rem;">
+                    Placed on ${orderDate} • ₹${latestOrder.totalAmount}
+                </div>
+                <div style="color: var(--primary); margin-top: 0.5rem;">
+                    Status: ${latestOrder.status || 'Processing'}
+                </div>
+            `;
         }
 
         function editProfile() {
@@ -288,4 +343,3 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 </body>
 </html>
-// [file content end]

@@ -1,3 +1,4 @@
+
 let currentUser = JSON.parse(localStorage.getItem("currentUser")) || null;
 let currentSlideIndex = 0;
 const totalSlides = 3;
@@ -75,7 +76,7 @@ function showPage(pageId) {
         if (pageId === 'cart') {
             loadCart();
         } else if (pageId === 'profile') {
-            loadUserProfile();
+            loadUserProfile(); // This will now load stats too
         } else if (pageId === 'orders') {
             loadUserOrders();
         } else if (pageId === 'home') {
@@ -267,22 +268,100 @@ function updateProfileInfo(user) {
     if (profileEmail) profileEmail.textContent = user.email;
 }
 
-// Load user profile from backend
+// Enhanced Load user profile from backend
 async function loadUserProfile() {
     try {
         const user = await getUserProfile();
         updateProfileInfo(user);
         
-        // Update profile stats if needed
-        const statNumber = document.querySelector('.stat-number');
-        if (statNumber) {
-            // You can fetch actual order count from backend here
-            statNumber.textContent = '0'; // Placeholder
-        }
+        // Update profile stats with real data
+        await updateProfileStats();
     } catch (error) {
         showNotification('Failed to load profile data');
         console.error('Profile load error:', error);
     }
+}
+
+// Enhanced profile stats function for SPA
+async function updateProfileStats() {
+    try {
+        // Update cart items count
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+        
+        const cartItemsCount = document.getElementById('cart-items-count');
+        if (cartItemsCount) {
+            cartItemsCount.textContent = totalItems;
+        }
+
+        // Fetch orders to calculate total orders and spending
+        const orders = await getUserOrders();
+        updateOrderStats(orders);
+        
+    } catch (error) {
+        console.error('Error updating profile stats:', error);
+        // Set default values if there's an error
+        const totalOrders = document.getElementById('total-orders');
+        const totalSpent = document.getElementById('total-spent');
+        const cartItemsCount = document.getElementById('cart-items-count');
+        
+        if (totalOrders) totalOrders.textContent = '0';
+        if (totalSpent) totalSpent.textContent = '₹0';
+        if (cartItemsCount) cartItemsCount.textContent = '0';
+    }
+}
+
+function updateOrderStats(orders) {
+    const totalOrders = document.getElementById('total-orders');
+    const totalSpent = document.getElementById('total-spent');
+
+    if (!totalOrders || !totalSpent) return;
+
+    if (!orders || orders.length === 0) {
+        totalOrders.textContent = '0';
+        totalSpent.textContent = '₹0';
+        return;
+    }
+
+    // Calculate total orders
+    const ordersCount = orders.length;
+    totalOrders.textContent = ordersCount;
+
+    // Calculate total spent
+    const totalAmount = orders.reduce((total, order) => {
+        return total + (parseFloat(order.totalAmount) || 0);
+    }, 0);
+    
+    totalSpent.textContent = `₹${totalAmount.toFixed(2)}`;
+
+    // Update activity message for SPA
+    updateActivityMessage(orders);
+}
+
+function updateActivityMessage(orders) {
+    const activityMessage = document.getElementById('activity-message');
+    if (!activityMessage) return;
+
+    if (!orders || orders.length === 0) {
+        activityMessage.textContent = 'No orders yet. Start shopping!';
+        return;
+    }
+
+    // Get the latest order
+    const latestOrder = orders[0];
+    const orderDate = new Date(latestOrder.orderDate).toLocaleDateString();
+    
+    activityMessage.innerHTML = `
+        <div style="color: var(--success); font-weight: 600; margin-bottom: 0.5rem;">
+            Latest Order: #BK${latestOrder.id}
+        </div>
+        <div style="color: var(--dark); margin-bottom: 0.25rem;">
+            Placed on ${orderDate} • ₹${latestOrder.totalAmount}
+        </div>
+        <div style="color: var(--primary); font-weight: 500;">
+            Status: ${latestOrder.status || 'Processing'}
+        </div>
+    `;
 }
 
 // Load user orders from backend
