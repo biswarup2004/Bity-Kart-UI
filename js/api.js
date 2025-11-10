@@ -1,5 +1,6 @@
 
 const BASE_URL = "https://tea-library.onrender.com";
+
 function getAuthHeaders() {
     const token = localStorage.getItem('token');
     const headers = {
@@ -23,7 +24,6 @@ async function registerUser(userData) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(userData)
-            
         });
 
         if (!response.ok) {
@@ -61,32 +61,69 @@ async function loginUser(credentials) {
     }
 }
 
+// Fixed getUserProfile function
 async function getUserProfile() {
     try {
         const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No authentication token found');
-        }
-
-        console.log('Fetching user profile...');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         
-        const response = await fetch(`${BASE_URL}/users/validate`, {
-            method: 'GET',
-            headers: getAuthHeaders()
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch user profile');
+        if (!token || !currentUser) {
+            throw new Error('No authentication token or user data found');
         }
 
-        return await response.json();
+        console.log('Fetching user profile for ID:', currentUser.id);
+        
+        // Try multiple endpoints - different APIs might use different endpoints
+        let response;
+        
+        // Try endpoint with user ID first
+        try {
+            response = await fetch(`${BASE_URL}/users/${currentUser.id}`, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+        } catch (error) {
+            console.log('First endpoint failed, trying validate endpoint...');
+            // Try validate endpoint as fallback
+            response = await fetch(`${BASE_URL}/users/validate`, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+        }
+
+        console.log('Profile response status:', response.status);
+        
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                console.log('Authentication failed - clearing user data');
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('token');
+                throw new Error('Session expired. Please sign in again.');
+            }
+            
+            const errorText = await response.text();
+            console.error('Profile fetch error:', errorText);
+            throw new Error(`Failed to fetch user profile: ${response.status}`);
+        }
+
+        const userData = await response.json();
+        console.log('User profile fetched successfully:', userData);
+        return userData;
     } catch (error) {
         console.error('Get user profile error:', error);
+        
+        // If we can't get fresh data, return the stored user data as fallback
+        const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (storedUser) {
+            console.log('Using stored user data as fallback');
+            return storedUser;
+        }
+        
         throw error;
     }
 }
 
-// Order API calls
+// Enhanced Order API calls with better error handling
 async function placeOrder(orderData) {
     try {
         const token = localStorage.getItem('token');
@@ -150,6 +187,13 @@ async function getUserOrders() {
                 localStorage.removeItem('token');
                 throw new Error('Session expired. Please sign in again.');
             }
+            
+            // If no orders found, return empty array instead of error
+            if (response.status === 404) {
+                console.log('No orders found for user');
+                return [];
+            }
+            
             throw new Error(`Failed to fetch orders: ${response.status}`);
         }
 
@@ -169,7 +213,9 @@ async function getUserOrders() {
             }, 2000);
         }
         
-        throw error;
+        // Return empty array for other errors to prevent page break
+        console.log('Returning empty orders array due to error');
+        return [];
     }
 }
 
