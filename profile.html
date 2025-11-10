@@ -102,11 +102,11 @@
                     
                     <div class="profile-stats">
                         <div class="stat-item">
-                            <div class="stat-number" id="total-orders">loading</div>
+                            <div class="stat-number" id="total-orders">0</div>
                             <div class="stat-label">Total Orders</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number" id="total-spent">loading</div>
+                            <div class="stat-number" id="total-spent">₹0</div>
                             <div class="stat-label">Total Spent</div>
                         </div>
                         <div class="stat-item">
@@ -114,7 +114,7 @@
                             <div class="stat-label">Reviews</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number" id="cart-items-count">loading</div>
+                            <div class="stat-number" id="cart-items-count">0</div>
                             <div class="stat-label">Cart Items</div>
                         </div>
                     </div>
@@ -247,8 +247,8 @@
 
             // You can fetch actual order stats from backend here
             // For now, using placeholders
-            document.getElementById('total-orders').textContent = '0';
-            document.getElementById('total-spent').textContent = '₹0';
+            document.getElementById('total-orders').textContent = 'loading';
+            document.getElementById('total-spent').textContent = 'loading';
         }
 
         function editProfile() {
