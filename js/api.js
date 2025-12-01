@@ -1,4 +1,4 @@
-const BASE_URL = "https://tea-library.onrender.com";
+const BASE_URL = "https://bitykart-backend.onrender.com";
 function getAuthHeaders() {
     const token = localStorage.getItem('token');
     const headers = {
