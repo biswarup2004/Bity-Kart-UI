@@ -197,7 +197,7 @@ function setupAuthForms() {
                     currentUser = result.user;
                     updateAuthUI();
                     closeModal('signup');
-                    showNotification(`Welcome to Tea Library, ${getFirstName(result.user.name)}!`);
+                    showNotification(`Welcome to 𝗕𝗶𝘁𝘆 𝗞𝗮𝗿𝘁, ${getFirstName(result.user.name)}!`);
                     
                     // Clear form
                     signupForm.reset();
